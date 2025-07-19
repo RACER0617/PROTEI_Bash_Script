@@ -1,0 +1,31 @@
+#!/bin/bash
+
+while true; do
+  clear
+  pid=$(ps aux --sort=-c --no-header | head -n 1 | awk '{print $2}')
+
+  if [[ -z "$pid" ]]; then
+    echo "Не удалось найти процесс с наибольшей загрузкой CPU."
+    sleep 5
+    continue
+  fi
+
+  if [[ -d "/proc/$pid" ]]  && [[ -r "/proc/$pid/status" ]]; then
+    echo "Информация о процессе с PID: $pid"
+    echo "----------------------------------"
+
+    echo "Файл /proc/$pid/status:"
+    awk '{print $0}' /proc/$pid/status | head -n 11
+
+    echo "----------------------------------"
+    awk '{print $0}' /proc/$pid/status | head -n 32 | tail -n 15
+
+    echo "Файл /proc/$pid/limits:"
+    cat /proc/$pid/limits
+
+  else
+    echo "Процесс с PID $pid не найден или нет прав на чтение его информации."
+  fi
+
+  sleep 5
+done
